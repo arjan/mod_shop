@@ -27,6 +27,7 @@
 -mod_schema(1).
 
 -include_lib("include/zotonic.hrl").
+-include_lib("include/mod_shop.hrl").
 
 -export([manage_schema/2, event/2]).
 
@@ -38,7 +39,24 @@ event({submit, {add_to_cart, [{id, Id}, {variant_id, VariantId}]}, _, _}, Contex
     Item = [{variant_id, VariantId}, {id, Id}, {price, Price}, {size, z_context:get_q("size", Context)}],
 
     m_shoppingcart:add_to_cart(Amount, Item, Context),   
+    Context;
+
+%% @doc On submit of the checkout form.
+event({submit, {checkout, []}, _, _}, Context) ->
+    FormValues = z_context:get_q_validated(
+                   [firstname, lastname, address, postcode, city, phone, email], Context),
+
+    ?DEBUG(FormValues),
+
+    Pp = list_to_existing_atom(z_context:get_q("payment-provider", Context)),
+    Provider = hd(lists:filter(fun(P) -> case P#payment_provider.module of Pp -> true; _ -> false end end,
+                               m_shop:get_payment_providers(Context))),
+                                                                               
+    ?DEBUG(Provider),
+
+
     Context.
+
 
 
 manage_schema(install, _Context) ->

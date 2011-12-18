@@ -53,9 +53,18 @@
 
     {% with m.shop.payment_providers as p %}
     {% if p|length == 1 %}
+    {% print p %}
+
     Payment will be done with {{ p[1].name }}
+    <input type="hidden" name="payment-provider" value="{{ p[1].module }}" />
+    
     {% else %}
     Choose payment provider
+    <select name="payment-provider">
+        {% for pr in p %}
+        <option value="{{ pr.module }}">{{ pr.name }}</option>
+        {% endfor %}
+    </select>
     {% endif %}
 
     {% endwith %}

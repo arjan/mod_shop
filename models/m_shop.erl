@@ -25,7 +25,10 @@
 -export([
          m_find_value/3,
          m_to_list/2,
-         m_value/2
+         m_value/2,
+
+         get_payment_providers/1,
+         lookup_provider/2
         ]).
 
 
@@ -35,7 +38,7 @@
 %% @doc Fetch the value for the key from a model source
 %% @spec m_find_value(Key, Source, Context) -> term()
 m_find_value(payment_providers, #m{value=undefined}, Context) ->
-    [pp_as_proplist(P) || P <- z_notifier:foldl(get_payment_providers, [], Context)].
+    [pp_as_proplist(P) || P <- get_payment_providers(Context)].
 
 
 %% @doc Transform a m_config value to a list, used for template loops
@@ -49,6 +52,18 @@ m_value(_, _Context) ->
     undefined.
 
 
+%% @doc Get all payment providers that are enabled.
+get_payment_providers(Context) ->
+    z_notifier:foldl(get_payment_providers, [], Context).    
 
 pp_as_proplist(Value = #payment_provider{}) ->
     lists:zip(record_info(fields, payment_provider), tl(tuple_to_list(Value))).
+
+
+%% @doc Lookup a provider by module name.
+lookup_provider(Module, Context) ->
+    hd(lists:filter(
+         fun(P) -> case P#payment_provider.module of Module -> true; _ -> false end end,
+         get_payment_providers(Context)
+        )).
+
