@@ -18,12 +18,14 @@
 %% See the License for the specific language governing permissions and
 %% limitations under the License.
 
--module(action_shoppingcart_add_to_cart).
+-module(action_shop_update_cart_amount).
 -author("Arjan Scherpenisse <arjan@scherpenisse.net>").
 
 -include("action_postback.hrl").
 
 postback(Args, Context) ->
-    {id, Id} = proplists:lookup(id, Args),
-    m_shoppingcart:add_to_cart(Id, Context),
+    {item, Item} = proplists:lookup(item, Args),
+    Amount = z_convert:to_integer(z_context:get_q("triggervalue", Context)),
+    m_shoppingcart:update_cart(Amount, Item, Context),
     Context.
+

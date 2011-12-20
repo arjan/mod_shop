@@ -18,7 +18,7 @@
 %% See the License for the specific language governing permissions and
 %% limitations under the License.
 
--module(action_shoppingcart_remove_from_cart).
+-module(action_shop_remove_from_cart).
 -author("Arjan Scherpenisse <arjan@scherpenisse.net>").
 
 -include("action_postback.hrl").

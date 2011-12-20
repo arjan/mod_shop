@@ -29,7 +29,11 @@
 -include_lib("include/zotonic.hrl").
 -include_lib("include/mod_shop.hrl").
 
--export([manage_schema/2, event/2]).
+-export([
+         manage_schema/2,
+         event/2,
+         observe_payment_status/2
+        ]).
 
 %% @doc Add an item to the shoppingcart.
 event({submit, {add_to_cart, [{id, Id}, {variant_id, VariantId}]}, _, _}, Context) ->
@@ -43,20 +47,36 @@ event({submit, {add_to_cart, [{id, Id}, {variant_id, VariantId}]}, _, _}, Contex
 
 %% @doc On submit of the checkout form.
 event({submit, {checkout, []}, _, _}, Context) ->
+
+    %% Get the checkout details
     FormValues = z_context:get_q_validated(
                    [firstname, lastname, address, postcode, city, phone, email], Context),
 
-    ?DEBUG(FormValues),
 
-    Pp = list_to_existing_atom(z_context:get_q("payment-provider", Context)),
-    Provider = hd(lists:filter(fun(P) -> case P#payment_provider.module of Pp -> true; _ -> false end end,
-                               m_shop:get_payment_providers(Context))),
-                                                                               
-    ?DEBUG(Provider),
+    Cart = m_shoppingcart:get_cart(Context),
+    Order = order_from_cart(Cart, FormValues, Context),
+
+    %% Store the order
+    Order1 = store_order(Order, Context),
+    
+    %% Do the payment
+    payment_redirect(Order1, Context).
 
 
-    Context.
 
+%% @doc A payment has been made. Redirect to a sane location.
+observe_payment_status(#payment_status{status=Status, order_id=OrderId, details=Details}, Context) ->
+
+    ContextAdmin = z_acl:sudo(Context),
+
+    %% Add information to the order
+    m_rsc:update(OrderId, [{payment, Details}, {status, Status}], ContextAdmin),
+    
+    %% Clear the cart
+    m_shoppingcart:empty_cart(Context),
+
+    %% Redirect
+    z_dispatcher:url_for(shop_order_status, [{id, OrderId}], Context).
 
 
 manage_schema(install, _Context) ->
@@ -66,7 +86,53 @@ manage_schema(install, _Context) ->
                    ],
                resources=
                    [
-                          {page_shoppingcart, text, [{title, <<"Shopping cart">>}, {page_path, <<"/cart">>}]},
-                          {page_checkout, text, [{title, <<"Checkout">>}, {page_path, <<"/checkout">>}]}
-                         ]
+                    {page_shoppingcart, text, [{title, <<"Shopping cart">>}, {page_path, <<"/cart">>}]},
+                    {page_checkout, text, [{title, <<"Checkout">>}, {page_path, <<"/checkout">>}]}
+                   ]
               }.
+
+
+
+%% @doc Given a shopping cart, create an order record.
+order_from_cart(Cart, FormValues, Context) ->
+    Items = proplists:get_value(items, Cart),
+    Items1 = [[{amount, Amount} | Item] || {Item, Amount} <- Items],
+    Cart1 = z_utils:prop_replace(items, Items1, Cart),
+    Price = proplists:get_value(total, Cart1),
+    Order = #shop_order{
+      status = new,
+      cart = Cart1,
+      details = FormValues,
+      id = undefined,
+      email = proplists:get_value(email, FormValues),
+      shopper_ref = z_context:persistent_id(Context),
+      price_ex_vat = Price*100,
+      price_inc_vat = round(Price*1.19*100)},
+    Order.
+
+
+%% @doc Store the order in the database.
+store_order(Order=#shop_order{}, Context) ->
+    ContextAdmin = z_acl:sudo(Context),
+    Props = [{category, shop_order},
+             {title, ["Shop order on ", erlydtl_dateformat:format("j F Y, H:i", ContextAdmin)]},
+             {is_published, true},
+             {status, Order#shop_order.status},
+             {order, lists:zip(record_info(fields, shop_order), tl(tuple_to_list(Order)))},
+             {visible_for, ?ACL_VIS_USER}],
+    {ok, Id} = m_rsc:insert(Props, ContextAdmin),
+    ?DEBUG(Id),
+    Order#shop_order{id=Id}.
+    
+
+%% @doc Handle the payment of the order based on the payment-provider POST value.
+payment_redirect(Order, Context) ->
+    %% Get the provider
+    Pp = list_to_existing_atom(z_context:get_q("payment-provider", Context)),
+    Provider = hd(lists:filter(fun(P) -> case P#payment_provider.module of Pp -> true; _ -> false end end,
+                               m_shop:get_payment_providers(Context))),
+
+    Module = Provider#payment_provider.module,
+    Function = Provider#payment_provider.function,
+    Module:Function(Order, Context).
+    

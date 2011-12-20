@@ -18,12 +18,12 @@
 %% See the License for the specific language governing permissions and
 %% limitations under the License.
 
--module(action_shoppingcart_empty_cart).
+-module(action_shop_add_to_cart).
 -author("Arjan Scherpenisse <arjan@scherpenisse.net>").
 
 -include("action_postback.hrl").
 
-postback(_Args, Context) ->
-    m_shoppingcart:empty_cart(Context),
+postback(Args, Context) ->
+    {id, Id} = proplists:lookup(id, Args),
+    m_shoppingcart:add_to_cart(Id, Context),
     Context.
-

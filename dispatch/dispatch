@@ -1,0 +1,3 @@
+[
+ {shop_order_status,        ["shop", "order", id],        resource_template, [{template, "shop_order_status.tpl"}]}
+].

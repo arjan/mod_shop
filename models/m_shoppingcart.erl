@@ -27,7 +27,9 @@
          m_to_list/2,
          m_value/2,
 
+         get_cart/1,
          add_to_cart/3,
+         update_cart/3,
          remove_from_cart/2,
          empty_cart/1
 ]).
@@ -53,19 +55,20 @@ m_value(_, _Context) ->
     undefined.
 
 
+%% @doc Get the cart from the sesion.
 get_cart(Context) ->
     z_context:get_session(m_shoppingcart, Context,
                           [{items, []},
                            {total, 0},
                            {count, 0}]).
 
+%% @doc Get only the items from the cart.
 get_cart_items(Context) ->
     proplists:get_value(items, get_cart(Context)).
 
+
 %% @doc Set the shopping cart to its new contents.
 set_cart(Items, Context) ->
-?DEBUG(Items),
-
     Total = lists:foldl(fun({I, C}, X) -> proplists:get_value(price, I, 0)*C+X end, 0.0, Items),
     Count = lists:sum([C || {_, C} <- Items]),
     Cart = [{items, Items},
@@ -75,7 +78,8 @@ set_cart(Items, Context) ->
     mod_signal:emit({shoppingcart_changed, [{cart, z_context:persistent_id(Context)}]}, Context).
 
 
-add_to_cart(Amount, Item, Context) ->
+%% @doc Add an item to the cart (one or more of the same)
+add_to_cart(Amount, Item, Context) when is_integer(Amount) andalso Amount > 0 ->
     Items = get_cart_items(Context),
     Items1 = case proplists:get_value(Item, Items) of
                  undefined ->
@@ -85,10 +89,20 @@ add_to_cart(Amount, Item, Context) ->
              end,
     set_cart(Items1, Context).
 
+%% @doc Update the amount of items in the cart
+update_cart(0, Item, Context) ->
+    remove_from_cart(Item, Context);
+update_cart(Amount, Item, Context) when is_integer(Amount) andalso Amount > 0 ->
+    Items = get_cart_items(Context),
+    Items1 =z_utils:prop_replace(Item, Amount, Items),
+    set_cart(Items1, Context).
 
+
+%% @doc Remove an item from the cart.
 remove_from_cart(Item, Context) ->
     set_cart(proplists:delete(Item, get_cart_items(Context)), Context).
 
 
+%% @doc Empty the shoppingcart.
 empty_cart(Context) ->
     set_cart([], Context).
