@@ -75,6 +75,23 @@ observe_payment_status(#payment_status{status=Status, order_id=OrderId, details=
     %% Clear the cart
     m_shoppingcart:empty_cart(Context),
 
+    %% Set order in session
+    OrderRsc = m_rsc:get(OrderId, Context),
+    z_context:set_session(shop_order, OrderRsc, Context),
+
+    %% E-mail
+    Email = proplists:get_value(email, proplists:get_value(details, proplists:get_value(order, OrderRsc))),
+
+    %% Mail the user
+    z_email:send(#email{
+                    to=Email,
+                    bcc="arjan@miraclethings.nl",
+                    reply_to=m_site:get(reply_to, Context),
+                    html_tpl="email_order_confirm.tpl",
+                    vars=[{order_id, OrderId}]
+                   }, Context),
+    
+
     %% Redirect
     z_dispatcher:url_for(shop_order_status, [{id, OrderId}], Context).
 
