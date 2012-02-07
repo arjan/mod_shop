@@ -36,17 +36,24 @@
         ]).
 
 %% @doc Add an item to the shoppingcart.
-event({submit, {add_to_cart, [{id, Id}, {variant_id, VariantId}]}, _, _}, Context) ->
+event(#submit{message={add_to_cart, Args}}, Context) ->
 
+    Id = proplists:get_value(id, Args),
+    VariantId = proplists:get_value(variant_id, Args),
+
+    
     Amount = abs(z_convert:to_integer(z_context:get_q("amount", Context))),
     Price = z_convert:to_float(m_rsc:p(VariantId, price, Context)),
     Item = [{variant_id, VariantId}, {id, Id}, {price, Price}, {size, z_context:get_q("size", Context)}],
 
-    m_shoppingcart:add_to_cart(Amount, Item, Context),   
-    Context;
+    m_shoppingcart:add_to_cart(Amount, Item, Context),
+
+    Actions = proplists:get_all_values(action, Args),
+    z_render:wire(Actions, Context);
+
 
 %% @doc On submit of the checkout form.
-event({submit, {checkout, []}, _, _}, Context) ->
+event(#submit{message={checkout, []}}, Context) ->
 
     %% Get the checkout details
     FormValues = z_context:get_q_validated(
