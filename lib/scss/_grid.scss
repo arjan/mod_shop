@@ -1,0 +1,21 @@
+$borderColor: #ddd;
+
+/* http://sonspring.com/journal/clearing-floats */
+.clear {
+  clear: both;
+  display: block;
+  overflow: hidden;
+  visibility: hidden;
+  width: 0;
+  height: 0;
+}
+
+
+.container {
+    width: 1040px;
+    margin: auto;
+}
+
+.mainsection {
+    border-bottom: 1px solid $borderColor;
+}

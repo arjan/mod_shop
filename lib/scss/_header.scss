@@ -1,0 +1,57 @@
+
+@mixin navlist($padding, $color) {
+    margin: 0; padding: 0;
+    padding-bottom: 20px;
+    
+    li {
+        padding-right: $padding;
+        list-style-type: none;
+        display: inline;
+        a {
+            text-decoration: none;
+            color: $color;
+        }
+    }
+}
+
+
+#header {
+    background: black;
+
+    img.logo {
+        display: block;
+        width: 175px;
+        height: auto;
+        padding: 42px 0;
+        margin: auto;
+    }
+
+    #navigation {
+        @include navlist(36px, $lightGray);
+
+        li {
+            text-transform: uppercase;
+            a.current {
+                color: white;
+            }
+        }
+    }
+
+    #minicart {
+        float: right;
+        a {
+            color: white;
+        }
+    }
+}
+
+
+#subnavigation {
+    @include navlist(19px, $lightGray);
+    padding: 12px 0;
+    li a.current {
+        color: black;
+    }
+
+}
+

@@ -1,0 +1,11 @@
+@mixin museo {
+    font-family: 'MuseoSans-500',sans-serif;
+}
+
+@mixin serif {
+    font-family: Georgia, serif;
+}
+
+$fontNormal: 12px;
+$fontBig: 18px;
+

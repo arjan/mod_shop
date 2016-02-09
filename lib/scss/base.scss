@@ -1,0 +1,56 @@
+$darkGray: #333;
+$lightGray: #777;
+$verylightGray: #ccc;
+$bgYellow: #f8ef6d;
+
+@import "reset";
+@import "typo";
+@import "grid";
+@import "header";
+@import "content";
+@import "footer";
+
+// categories
+@import "fullimage";
+@import "product";
+@import "outfit";
+
+@import "cart";
+@import "pages";
+
+
+@import "imagemagnifier";
+
+body {
+    -moz-font-feature-settings: "calt=0,liga=0";
+    @include museo;
+    font-size: $fontNormal;
+    line-height: 1.5*$fontNormal;
+}
+
+a, a:visited {
+    text-decoration: none;
+    color: $lightGray;
+}
+a:hover {
+    text-decoration: underline;
+}
+a:focus {
+    outline: none;
+}
+
+h1 {
+    @include museo;
+    font-weight: normal;
+    text-transform: uppercase;
+    font-size: $fontBig;
+    margin-top: 0;
+}
+
+h2 {
+    margin-top: 20px;
+    @include museo;
+    font-weight: normal;
+    font-size: $fontBig;
+}
+

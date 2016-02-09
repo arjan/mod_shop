@@ -1,0 +1,27 @@
+body.product {
+    div.main-image {
+        width: 400px;
+        float: left;
+        margin-right: 90px;
+    }
+}
+
+div.product-popup
+{
+    width: 124px;
+    ul.variants {
+        @include list-reset;
+        li {
+            float: left;
+        }
+    }
+
+    h3 {
+        padding: 0;
+        margin: 0;
+        margin-bottom: 4px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+}

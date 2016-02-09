@@ -32,6 +32,7 @@
 -export([
          manage_schema/2,
          event/2,
+         observe_rsc_update_done/2,
          observe_payment_status/2
         ]).
 
@@ -41,7 +42,7 @@ event(#submit{message={add_to_cart, Args}}, Context) ->
     Id = proplists:get_value(id, Args),
     VariantId = proplists:get_value(variant_id, Args),
 
-    
+
     Amount = abs(z_convert:to_integer(z_context:get_q("amount", Context))),
     Price = z_convert:to_float(m_rsc:p(VariantId, price, Context)),
     Item = [{variant_id, VariantId}, {id, Id}, {price, Price}, {size, z_context:get_q("size", Context)}],
@@ -65,7 +66,7 @@ event(#submit{message={checkout, []}}, Context) ->
 
     %% Store the order
     Order1 = store_order(Order, Context),
-    
+
     %% Do the payment
     payment_redirect(Order1, Context).
 
@@ -78,7 +79,7 @@ observe_payment_status(#payment_status{status=Status, order_id=OrderId, details=
 
     %% Add information to the order
     m_rsc:update(OrderId, [{payment, Details}, {status, Status}], ContextAdmin),
-    
+
     %% Clear the cart
     m_shoppingcart:empty_cart(Context),
 
@@ -97,7 +98,7 @@ observe_payment_status(#payment_status{status=Status, order_id=OrderId, details=
                     html_tpl="email_order_confirm.tpl",
                     vars=[{order_id, OrderId}]
                    }, Context),
-    
+
 
     %% Redirect
     z_dispatcher:url_for(shop_order_status, [{id, OrderId}], Context).
@@ -106,10 +107,34 @@ observe_payment_status(#payment_status{status=Status, order_id=OrderId, details=
 manage_schema(install, _Context) ->
     #datamodel{categories=
                    [
-                    {shop_order, undefined, [{title, <<"Shop order">>}]}
+                    {shop_order, undefined, [{title, <<"Shop order">>}]},
+                    {product, undefined, [{title, <<"Product">>}]}, 
+
+                    {product_women, product, [{title, <<"Women">>}]},
+                    {skirts, product_women, [{title, <<"Skirts and Trousers">>}]},
+                    {tops, product_women, [{title, <<"Tops">>}]},
+                    {dresses, product_women, [{title, <<"Dresses">>}]},
+                    {coats, product_women, [{title, <<"Coats and Jackets">>}]},
+                    {accessoires_women, product, [{title, <<"Accessoires">>}]},
+                    {outlet, product_women, [{title, <<"Outlet">>}]},
+
+                    {variant,
+                     undefined,
+                     [{title, <<"Product variant">>}]},
+
+                    {fullimage, text, [{title, <<"Full-image page">>}]},
+                    {outfit, text, [{title, <<"Outfits">>}]}
+                   ],
+               predicates=
+                   [
+                    {has_variant,
+                     [{title, <<"Variant">>}],
+                     [{product, variant}]}
                    ],
                resources=
                    [
+                    {page_home, text, [{title, <<"Shop online">>}, {page_path, <<"/">>}]},
+
                     {page_shoppingcart, text, [{title, <<"Shopping cart">>}, {page_path, <<"/cart">>}]},
                     {page_checkout, text, [{title, <<"Checkout">>}, {page_path, <<"/checkout">>}]}
                    ]
@@ -124,14 +149,14 @@ order_from_cart(Cart, FormValues, Context) ->
     Cart1 = z_utils:prop_replace(items, Items1, Cart),
     Price = proplists:get_value(total, Cart1),
     Order = #shop_order{
-      status = new,
-      cart = Cart1,
-      details = FormValues,
-      id = undefined,
-      email = proplists:get_value(email, FormValues),
-      shopper_ref = z_context:persistent_id(Context),
-      price_ex_vat = Price*100,
-      price_inc_vat = round(Price*1.19*100)},
+               status = new,
+               cart = Cart1,
+               details = FormValues,
+               id = undefined,
+               email = proplists:get_value(email, FormValues),
+               shopper_ref = z_context:persistent_id(Context),
+               price_ex_vat = Price*100,
+               price_inc_vat = round(Price*1.19*100)},
     Order.
 
 
@@ -147,7 +172,7 @@ store_order(Order=#shop_order{}, Context) ->
     {ok, Id} = m_rsc:insert(Props, ContextAdmin),
     ?DEBUG(Id),
     Order#shop_order{id=Id}.
-    
+
 
 %% @doc Handle the payment of the order based on the payment-provider POST value.
 payment_redirect(Order, Context) ->
@@ -159,4 +184,16 @@ payment_redirect(Order, Context) ->
     Module = Provider#payment_provider.module,
     Function = Provider#payment_provider.function,
     Module:Function(Order, Context).
-    
+
+
+observe_rsc_update_done(#rsc_update_done{action=insert, id=Id, post_is_a=IsA}, Context) ->
+    case hd(IsA) of
+        product ->
+            %% insert a variant + variant edge
+            {ok, VariantId} = m_rsc:insert([{is_published, true}, {category, variant}, {title, <<"Default">>}], Context),
+            m_edge:insert(Id, has_variant, VariantId, Context),
+            ok;
+        _ -> ok
+    end;
+observe_rsc_update_done(_, _) ->
+    undefined.

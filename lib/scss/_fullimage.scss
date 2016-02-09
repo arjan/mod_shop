@@ -1,0 +1,18 @@
+div.content {
+
+    div.fullimage {
+        position: relative;
+        img {
+            margin-left: -80px;
+        }
+        div.body {
+            padding: 14px 20px;
+            position: absolute;
+            width: 307px;
+            height: 295px;
+            background: $bgYellow;
+            right: 100px;
+            top: 80px;
+        }
+    }
+}

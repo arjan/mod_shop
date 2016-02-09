@@ -1,0 +1,25 @@
+body.page_contact {
+    div.content {
+        width: 300px;
+        float: left;
+        background: $bgYellow;
+        margin: 20px 0;
+        padding: 10px;
+
+        h1 {
+            margin-top: 0;
+        }
+    }
+}
+
+body.page_terms {
+    div.content {
+        background: $bgYellow;
+        margin: 20px 0;
+        padding: 10px;
+
+        h1 {
+            margin-top: 0;
+        }
+    }
+}

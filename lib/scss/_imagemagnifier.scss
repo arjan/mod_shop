@@ -1,0 +1,71 @@
+
+div.do_imagemagnifier
+{
+    position: relative;
+    
+    div.target {
+        position: absolute;
+        top: 0;
+        left: 480px;
+        height: 510px;
+        width: 570px;
+    }
+
+    div.loader {
+        top: 240px;
+        left: 175px;
+    }        
+}
+
+div.loader {
+    padding: 15px;
+    height: 20px;
+    background: white;
+    border-radius: 10px;
+    position: absolute;
+}
+
+div.indicator {
+    cursor: pointer;
+}
+
+div.overlay {
+    background: rgba(0.0, 0.0, 0.0, 0.5);
+    position: absolute;
+    top: 0; left: 0;
+    right: 0; bottom: -400px;
+}
+
+div.lightbox {
+
+    div.loader {
+        top: 240px;
+        left: 300px;
+    }        
+
+    position: absolute;
+    padding: 29px;
+    background: white;
+    box-shadow: 4px 4px 10px black;
+    img.source {
+        width: 600px;
+    }
+    a {
+        position: absolute;
+    }        
+    a.left {
+        width: 29px; height: 29px;
+        background: url(/lib/images/arrow-left.png);
+        left: 0; top: 255px;
+    }
+    a.right {
+        width: 29px; height: 29px;
+        background: url(/lib/images/arrow-right.png);
+        right: 0; top: 255px;
+    }
+    a.close {
+        width: 25px; height: 25px;
+        background: url(/lib/images/close.png);
+        right: 0; top: 0;
+    }
+}

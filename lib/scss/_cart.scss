@@ -1,0 +1,59 @@
+
+table.cart {
+
+    tr {
+
+
+        th, td {
+            border-bottom: 1px solid $verylightGray;
+        }
+        
+        th {
+            font-weight: normal;
+        }
+
+        td {
+            padding: 12px 0;
+
+            a { color: black; }
+                
+        }
+
+        td.right, th.right {
+            text-align: right;
+            padding-right: 10px;
+        }
+
+    }
+
+
+    input, button {
+        padding: 5px 10px;
+        border: 1px solid $verylightGray;
+        background: white;
+    }
+    input {
+        width: 20px;
+    }
+}
+
+
+p.cart-buttons {
+    margin-top: 40px;
+    margin-bottom: 120px;
+    
+    a.update, button {
+        float: right;
+        margin-left: 10px;
+    }
+
+    button {
+        padding: 5px 20px;
+        background: black;
+        color: white;
+        text-transform: uppercase;
+        border: 0;
+        margin-top: -5px;
+    }
+    
+}

@@ -1,0 +1,77 @@
+body.outfit {
+
+    div.outfit-wrapper {
+        width: 880px;
+        margin: auto;
+    }
+    p.prev-next {
+        float: right;
+    }
+    
+    div.outfit-details {
+        float: left;
+        width: 415px;
+        height: 510px;
+        overflow: hidden;
+        position: relative;
+
+        border-top: 1px solid $borderColor;
+
+        /*        height: 524px;
+        border-top: 1px solid $borderColor;
+        margin-top: -25px; */
+
+        div.content-block {
+            padding: 10px;
+            border-bottom: 1px solid $borderColor;
+        }
+        
+        div.outfit-grid {
+            position: absolute;
+            bottom: 0;
+        }
+    }
+
+    
+    div.main-image {
+        width: 420px;
+        float: right;
+        margin-left: 0px;
+        div.below-image {
+            span {
+                float: right;
+                a:last-child {
+                    padding-left: 10px;
+                }
+            }
+            a {
+                color: $lightGray;
+            }
+        }
+    }
+
+    div.outfit-grid {
+        padding-top: 45px;
+        a {
+            float: left;
+            margin-left: 45px;
+        }
+        a:first-child {
+            margin-left: 0;
+        }
+    }
+
+    div.do_imagemagnifier
+    {
+        position: relative;
+        
+        div.target {
+            position: absolute;
+            top: 0;
+            left: -460px;
+            height: 510px;
+            width: 415px;
+            z-index: 8;
+        }
+    }    
+}

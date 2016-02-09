@@ -1,0 +1,25 @@
+#menu-navigation {
+    @include list-reset;
+    padding-top: 30px;
+    
+    ul {
+        @include list-reset;
+    }
+    
+    a {
+        color: black;
+    }
+    
+    > li {
+        float: left;
+        > a {
+            padding-right: 70px;
+            text-transform: uppercase;
+        }
+    }
+}
+
+img.payment-methods {
+    padding-top: 30px;
+    float: right;
+}
